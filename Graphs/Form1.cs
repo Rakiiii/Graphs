@@ -27,6 +27,9 @@ namespace Graphs
         //
         InformationForm frmInf = new InformationForm();
 
+        //
+        FileIsNotSavedEr frmFileIsNotSavedEr = new FileIsNotSavedEr();
+
         //инициалтхзируем список координат для случайного расположения графа
         List<Point> cordsRand;
 
@@ -389,6 +392,10 @@ namespace Graphs
                     gr.saveGraph(path);
                 }
             }
+            catch(UnauthorizedAccessException er)
+            {
+                frmFileIsNotSavedEr.ShowDialog();
+            }
             catch (Exception er)
             {
                 Logger.writeLog(er.ToString());
@@ -407,7 +414,11 @@ namespace Graphs
                     }
                 }
             }
-            catch(Exception er)
+            catch (UnauthorizedAccessException er)
+            {
+                frmFileIsNotSavedEr.ShowDialog();
+            }
+            catch (Exception er)
             {
                 Logger.writeLog(er.ToString());
             }
