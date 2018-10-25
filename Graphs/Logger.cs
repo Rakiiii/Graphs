@@ -9,11 +9,14 @@ namespace Graphs
 {
       class Logger
     {
-
+        static private bool flag = false;
         static public void writeLog(string log)
         {
-            StreamWriter logger = new StreamWriter(@"C:\log.txt");
+            StreamWriter logger = new StreamWriter(@"C:\log.txt", flag);
+            flag = true;
+           
             logger.WriteLine(log);
+          
             logger.Close();
             return;
         }

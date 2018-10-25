@@ -16,7 +16,7 @@ namespace Graphs
     public partial class Form1 : Form
     {
         //объявляем переменнуб для хранения пути
-        string path;
+        string path = @"C:\someTestStuff.txt";
 
         //инициализируем объект для работы с выбором папки
         OpenFileDialog fbd = new OpenFileDialog();
@@ -25,10 +25,10 @@ namespace Graphs
         FrmError frmError = new FrmError();
 
         //инициалтхзируем список координат для случайного расположения графа
-        List<Point> cordsRand = new List<Point>();
+        List<Point> cordsRand;
 
         //инициализируем список координат для графа по уровням
-        List<Point> cordsLvled = new List<Point>();
+        List<Point> cordsLvled;
 
         //иницаилиируем объект для работы с псевдослучайными велечинами
         Random rnd = new Random((int)DateTimeOffset.Now.ToUnixTimeSeconds());
@@ -73,7 +73,10 @@ namespace Graphs
                 if (rdbtnAsAgraph.Checked)
                 {
                     //инициализируем наш граф
-                     gr = new grapher(path);
+                    if (gr == null)
+                        gr = new grapher(path);
+                    if(cordsRand == null)
+                        cordsRand = new List<Point>();
 
                     //заполняем кооринаты графа случайным образом
                     for (int i = 0; i <= gr.amountOfVertex - 1; i++)
@@ -87,13 +90,34 @@ namespace Graphs
                 else
                 {
                     //инициализируем граф
+                    if(gr == null)
                     gr = new grapher(path);
+                    if(cordsLvled == null)
+                        cordsLvled = new List<Point>();
 
                     //красим граф
                     gr.colorGraph();
-                    
+
+                    //расчитываем самый глупый вариант развития событий
+                    if (cordsRand == null)
+                        cordsRand = new List<Point>();
+
+                    //заполняем кооринаты графа случайным образом
+                    for (int i = 0; i <= gr.amountOfVertex - 1; i++)
+                    {
+                        cordsRand.Add(new Point(rnd.Next(pctrbxMain.Width), rnd.Next(pctrbxMain.Height)));
+                    }
+
+                    //перфоманс
+                    int amOfCol = gr.checkAmountOfColors();
+
+                    //заполням первично список
+                    for(int i = 0; i < gr.amountOfVertex; i ++)
+                    {
+                        cordsLvled.Add(new Point(0, 0));
+                    }
                     //считаем координаты раскрагенного графа
-                    for( int i = 0; i < gr.checkAmountOfColors(); i++)
+                    for ( int i = 1; i <= amOfCol; i++)
                     {
                         //коэффицкнт для расположения вершин на 1 уровне
                         int k = 1;
@@ -104,7 +128,7 @@ namespace Graphs
                             if(gr.checkColorOfVertex(j) == i)
                             {
                                 //то присваиваем ей координату 
-                                cordsLvled.Add( new Point( k*pctrbxMain.Width/(gr.checkAmountOfColor(i) + 1), i * ( pctrbxMain.Height / gr.checkAmountOfColors() ) ) );
+                                cordsLvled[j] =( new Point( k*pctrbxMain.Width/(gr.checkAmountOfColor(i) + 1), i * ( pctrbxMain.Height / (amOfCol + 1) ) ) );
 
                                 //инкрементируем коэффицент красоты
                                 k++;
@@ -203,7 +227,7 @@ namespace Graphs
                     //двигаем фокус на следующий элемент
                     if (e.KeyChar == (char)Keys.Enter)
                     {
-                        txtbxSecondVertex.Focus();
+                        btnShowGraph.Focus();
                     }
                     else
                     {
@@ -229,6 +253,9 @@ namespace Graphs
                     gr.addVertex();
                     cordsRand.Add(new Point(rnd.Next(pctrbxMain.Width), rnd.Next(pctrbxMain.Height)));
                     cordsLvled.Add(new Point(rnd.Next(pctrbxMain.Width), rnd.Next(pctrbxMain.Height)));
+                    rdbtnAsAgraph.Checked = true;
+                    btm = gr.drawGraph(cordsRand, btm);
+                    pctrbxMain.Image = btm;
 
                 }
 
@@ -247,7 +274,7 @@ namespace Graphs
                     Bitmap btm = new Bitmap(pctrbxMain.Width, pctrbxMain.Height);
                     if (txtbxFirstVertex.Text != "" && txtbxSecondVertex.Text != "")
                     {
-                        gr.addEdge(firstVertex: Convert.ToInt32(txtbxFirstVertex.Text) - 1, secondVertex: Convert.ToInt32(txtbxSecondVertex.Text) - 1);
+                        gr.addEdge(firstVertex: Convert.ToInt32(txtbxFirstVertex.Text) , secondVertex: Convert.ToInt32(txtbxSecondVertex.Text));
                         rdbtnAsAgraph.Checked = true;                        
                         btm = gr.drawGraph(cordsRand, btm);
                         pctrbxMain.Image = btm;
@@ -268,10 +295,27 @@ namespace Graphs
                 Bitmap btm = new Bitmap(pctrbxMain.Width, pctrbxMain.Height);
                 if(txtbxFirstVertex.Text != "")
                 {
-                    gr.removeVertex(Convert.ToInt32(txtbxFirstVertex.Text) - 1);
-                    cordsRand.RemoveAt(Convert.ToInt32(txtbxFirstVertex.Text) - 1);
-                    cordsLvled.RemoveAt(Convert.ToInt32(txtbxFirstVertex.Text) - 1);
+                    gr.removeVertex(Convert.ToInt32(txtbxFirstVertex.Text));
+                    cordsRand.RemoveAt(Convert.ToInt32(txtbxFirstVertex.Text));
+                    cordsLvled.RemoveAt(Convert.ToInt32(txtbxFirstVertex.Text));
+                    if (rdbtnAsAgraph.Checked) btm = gr.drawGraph(cordsRand, btm);
+                    else btm = gr.drawGraph(cordsLvled, btm);
                 }
+                else
+                {
+                    if (txtbxSecondVertex.Text != "")
+                    {
+                        gr.removeVertex(Convert.ToInt32(txtbxSecondVertex.Text));
+                        cordsRand.RemoveAt(Convert.ToInt32(txtbxSecondVertex.Text));
+                        cordsLvled.RemoveAt(Convert.ToInt32(txtbxSecondVertex.Text));
+                        if (rdbtnAsAgraph.Checked) btm = gr.drawGraph(cordsRand, btm);
+                        else btm = gr.drawGraph(cordsLvled, btm);
+                    }
+                    else return;
+                }
+            }catch(Exception er)
+            {
+                Logger.writeLog(Convert.ToString(er));
             }
         }
     }

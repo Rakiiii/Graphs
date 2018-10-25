@@ -120,7 +120,7 @@
             // 
             this.btnRemoveVertex.Location = new System.Drawing.Point(794, 242);
             this.btnRemoveVertex.Name = "btnRemoveVertex";
-            this.btnRemoveVertex.Size = new System.Drawing.Size(100, 41);
+            this.btnRemoveVertex.Size = new System.Drawing.Size(100, 53);
             this.btnRemoveVertex.TabIndex = 7;
             this.btnRemoveVertex.Text = "Remove Vertex";
             this.btnRemoveVertex.UseVisualStyleBackColor = true;
@@ -130,7 +130,7 @@
             // 
             this.btnRemoveEdge.Location = new System.Drawing.Point(916, 242);
             this.btnRemoveEdge.Name = "btnRemoveEdge";
-            this.btnRemoveEdge.Size = new System.Drawing.Size(100, 41);
+            this.btnRemoveEdge.Size = new System.Drawing.Size(100, 53);
             this.btnRemoveEdge.TabIndex = 8;
             this.btnRemoveEdge.Text = "Remove Edge";
             this.btnRemoveEdge.UseVisualStyleBackColor = true;

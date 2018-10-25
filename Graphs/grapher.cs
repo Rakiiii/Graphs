@@ -37,7 +37,7 @@ namespace Graphs
         public grapher(string path)
         {
             
-           // Logger.writeLog("we can go inside at least");
+           
             //читаем файл по переднному в конструктор путь path
             StreamReader file = new StreamReader(path);
 
@@ -99,6 +99,8 @@ namespace Graphs
             //добовляем наше ребро в матрицу смежности
             graph[firstVertex - 1][secondVertex - 1] = weight;
             graph[secondVertex - 1][firstVertex - 1] = weight;
+            Logger.writeLog(graph[firstVertex - 1][secondVertex - 1].ToString());
+            Logger.writeLog(graph[secondVertex - 1][firstVertex - 1].ToString());
             return;
         }
 
@@ -154,11 +156,26 @@ namespace Graphs
         //красим граф
         public void colorGraph()
         {
+            int amc = colors.Count;
             //первичная раскраска
-            for(int i = 0;i < amountOfVertex; i++)
+            if (_amountOfVertex > amc)
             {
-                colors.Add(0);
+
+                for (int i = 0; i < (_amountOfVertex - amc) ; i++)
+                {
+                    colors.Add(0);
+                }
+            }else
+            {
+                if(_amountOfVertex < amc)
+                    for( int i = 0; i < (amc - _amountOfVertex); i++)
+                    {
+                        colors.RemoveAt(1);
+                    }
             }
+
+            for (int i = 0; i < amountOfVertex; i++)
+                colors[i] = 0;
 
             //проходим все вершины
             for(int i = 0; i < amountOfVertex; i++)
@@ -180,7 +197,23 @@ namespace Graphs
         //проверяем количество цветов
         public int checkAmountOfColors()
         {
-            return colors.Capacity;
+            int counter = 0;
+            int flag = 0;
+            for (int i = 0; i < colors.Count; i++)
+            {
+                int j = 0;
+                while (flag == 0 && j < colors.Count)
+                {
+                    if (colors[j] == i)
+                    {
+                        counter++;
+                        flag = 1;
+                    }
+                    j++;
+                }
+                flag = 0;
+            }
+            return counter;
         }
 
         //проверяем цвет конкретной вершины
@@ -214,8 +247,11 @@ namespace Graphs
             //рисуем граф
             for (int i = 0; i < _amountOfVertex ; i++)
             {
-                //ртсуем номера вершин
-                drawerMain.DrawString(Convert.ToString(i + 1), new Font("Arial", 16), new SolidBrush(Color.Red), cords[i].X + 5, cords[i].Y + 5);
+                Point tmp = new Point(cords[i].X + 5, cords[i].Y + 5);
+                if (tmp.X > btm.Width - 10) tmp.X -= 15;
+                if (tmp.Y > btm.Height - 10) tmp.Y -= 15;
+                //рисуем номера вершин
+                drawerMain.DrawString(Convert.ToString(i + 1), new Font("Arial", 12), new SolidBrush(Color.Red), cords[i].X + 5, cords[i].Y + 5);
                 
                 //рисуем сами вершины
                 drawerMain.DrawEllipse(new Pen(Color.Black), new Rectangle(cords[i].X - 2, cords[i].Y - 2, 4, 4));
