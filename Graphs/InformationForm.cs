@@ -10,12 +10,11 @@ using System.Windows.Forms;
 
 namespace Graphs
 {
-    public partial class FrmError : Form
+    public partial class InformationForm : Form
     {
-        public FrmError()
+        public InformationForm()
         {
             InitializeComponent();
-            lblError.Text = "Error";
         }
 
         private void btnClose_Click(object sender, EventArgs e)

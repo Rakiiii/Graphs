@@ -22,10 +22,13 @@ namespace Graphs
         {
             get { return _amountOfVertex; }
         }
+
+        
             
 
         //список раскрашенных вершин
         private List<int> colors = new List<int>();
+        private List<int> verColr = new List<int>();
 
         public bool checkEdge(int ferstVertex , int secondVertex)
         {
@@ -73,35 +76,34 @@ namespace Graphs
                 //добовляем строку матрицы смежности в матрицу смежности
                 graph.Add(lineOfMatrix);
             }
+            file.Close();
         }
 
         //удаление ребра
         //на вход получаем номера двух вершин между которыми ребро
-        public void removeEdge(int firstVertex, int secondVertex )
+        public bool removeEdge(int firstVertex, int secondVertex )
         {
             //если вершины с такими номерами отсутствуют в графе ,тогда выходим
-            if ((firstVertex > _amountOfVertex) || (secondVertex > _amountOfVertex)) return;
+            if ((firstVertex > _amountOfVertex) || (secondVertex > _amountOfVertex)) return false;
 
             //нет ребра~0 на пересечении столбца и строку с номерами вершин
             //обнуляем пересечение 
-            graph[firstVertex][secondVertex - 1] = 0;
-            graph[secondVertex][firstVertex - 1] = 0;
-            return;
+            graph[firstVertex - 1][secondVertex - 1] = 0;
+            graph[secondVertex - 1][firstVertex - 1] = 0;
+            return true;
         }
 
         //добавление ребра взвешенного графа
         //получаем на вход две вершины и вес нового ребра
-        public void addEdge(int firstVertex, int secondVertex, int weight = 1)
+        public bool addEdge(int firstVertex, int secondVertex, int weight = 1)
         {
             //если вершины с такими номерами отсутствуют в графе ,тогда выходим
-            if ((firstVertex > _amountOfVertex) || (secondVertex > _amountOfVertex)) return;
+            if ((firstVertex > _amountOfVertex) || (secondVertex > _amountOfVertex)) return false;
 
             //добовляем наше ребро в матрицу смежности
             graph[firstVertex - 1][secondVertex - 1] = weight;
             graph[secondVertex - 1][firstVertex - 1] = weight;
-            Logger.writeLog(graph[firstVertex - 1][secondVertex - 1].ToString());
-            Logger.writeLog(graph[secondVertex - 1][firstVertex - 1].ToString());
-            return;
+            return true;
         }
 
         //удаление вершины
@@ -157,25 +159,35 @@ namespace Graphs
         public void colorGraph()
         {
             int amc = colors.Count;
-            //первичная раскраска
+            //выравниваем размер списка задающего раскраску графа
+            //если вершин в графе больше, чем вершин для раскрашиванния
             if (_amountOfVertex > amc)
             {
-
+                //дополняем нодостоющими
                 for (int i = 0; i < (_amountOfVertex - amc) ; i++)
                 {
                     colors.Add(0);
+                    verColr.Add(0);
                 }
-            }else
+            }
+            else
             {
+                //если вершин для раскраски больше
                 if(_amountOfVertex < amc)
+                    //то удаляем лишние
                     for( int i = 0; i < (amc - _amountOfVertex); i++)
                     {
                         colors.RemoveAt(1);
+                        verColr.RemoveAt(1);
                     }
             }
 
+            //красим граф в 0 цвет
             for (int i = 0; i < amountOfVertex; i++)
+            {
                 colors[i] = 0;
+                verColr[i] = 0;
+            }
 
             //проходим все вершины
             for(int i = 0; i < amountOfVertex; i++)
@@ -183,12 +195,38 @@ namespace Graphs
                 //если вершина не покрашена  - красим в 1
                 if (colors[i] == 0) colors[i] = 1;
                 //проходим все вершины по строке
-                for(int j = 0; j < amountOfVertex; j++)
+                for (int j = 0; j < amountOfVertex; j++)
                 {
                     //если есть ребро между 2 вершинами и 2 вершина не покрашена
-                    if ((graph[i][j] != 0) && (colors[j] == 0))
-                        //красим ее в следущий цвет
-                        colors[j] = colors[i] + 1;
+                    if (graph[i][j] != 0)
+                    {
+                        if (colors[j] == 0)
+                        {
+                            //красим ее в следущий цвет
+                            colors[j] = colors[i] + 1;
+                            verColr[j] = i;
+                        }
+                        else
+                        {
+                            if (j < i && colors[j] == 1 && j != 0 && verColr[i] != j)
+                            {
+                                int counter = 0;
+                                for(int k = 0; k < i; k++)
+                                {
+                                    if (graph[j][k] != 0) counter++;
+                                }
+                                if (counter == 0)
+                                {
+                                    colors[j] = colors[i] + 1;
+                                    for(int k = 0; k < _amountOfVertex; k++)
+                                    {
+                                        if (verColr[k] == j) colors[k] = colors[j] + 1;
+                                    }
+                                    
+                                }
+                            }
+                        }
+                    }
                 }
             }
             return;
@@ -248,10 +286,10 @@ namespace Graphs
             for (int i = 0; i < _amountOfVertex ; i++)
             {
                 Point tmp = new Point(cords[i].X + 5, cords[i].Y + 5);
-                if (tmp.X > btm.Width - 10) tmp.X -= 15;
-                if (tmp.Y > btm.Height - 10) tmp.Y -= 15;
+                if (tmp.X > btm.Width - 25) tmp.X -= 30;
+                if (tmp.Y > btm.Height - 25) tmp.Y -= 30;
                 //рисуем номера вершин
-                drawerMain.DrawString(Convert.ToString(i + 1), new Font("Arial", 12), new SolidBrush(Color.Red), cords[i].X + 5, cords[i].Y + 5);
+                drawerMain.DrawString(Convert.ToString(i + 1), new Font("Arial", 12), new SolidBrush(Color.Red), tmp.X, tmp.Y);
                 
                 //рисуем сами вершины
                 drawerMain.DrawEllipse(new Pen(Color.Black), new Rectangle(cords[i].X - 2, cords[i].Y - 2, 4, 4));
@@ -267,6 +305,24 @@ namespace Graphs
                 }
             }
             return btm;
+        }
+
+        public void saveGraph(string path)
+        {
+            
+            StreamWriter saver = new StreamWriter(path, false);
+            saver.WriteLine(_amountOfVertex.ToString());
+            for(int i = 0; i < _amountOfVertex; i++)
+            {
+                string line = "";
+                for (int j = 0; j < _amountOfVertex; j++)
+                {
+                    line += (graph[i][j].ToString() + " ");
+                }
+                saver.WriteLine(line);
+            }
+            saver.Close();
+            return;
         }
     }
 }
